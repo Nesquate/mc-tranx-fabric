@@ -1,11 +1,8 @@
-package tw.nesquate.TranX;
+package tw.nesquate.TranX.command;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.EntitySelector;
-import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -25,38 +22,11 @@ import tw.nesquate.TranX.utils.Utils;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-
-public class Commands {
-
+public class MoneyCommands {
     private final Money moneyAdapter;
 
-    public Commands(Money adapter) {
+    public MoneyCommands(Money adapter){
         moneyAdapter = adapter;
-    }
-
-    public void register() {
-        CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
-                dispatcher.register(literal("money")
-                        .executes(this::getMoney))));
-        CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
-                dispatcher.register(
-                        literal("transfer").then(
-                                argument("Player", EntityArgumentType.player()).then(
-                                        argument("Money", IntegerArgumentType.integer()).executes(this::transferMoney)
-                                )
-                        )
-                )
-        ));
-        CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> dispatcher.register(
-                literal("deposit").executes(this::depositMoney)
-        )));
-        CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) -> dispatcher.register(
-                literal("withdraw").then(
-                        argument("Money", IntegerArgumentType.integer()).executes(this::withdrawMoney)
-                )
-        )));
     }
 
     public int getMoney(CommandContext<ServerCommandSource> context) {

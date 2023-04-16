@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tw.nesquate.TranX.command.Commands;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
 import tw.nesquate.TranX.money.Money;
 
