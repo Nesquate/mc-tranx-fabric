@@ -1,13 +1,9 @@
 package tw.nesquate.TranX.money;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
 import tw.nesquate.TranX.exception.money.MinusMoneyException;
 import tw.nesquate.TranX.exception.money.NullMoneyException;
-import tw.nesquate.TranX.utils.Utils;
 
 import java.math.BigDecimal;
 import java.util.HashMap;

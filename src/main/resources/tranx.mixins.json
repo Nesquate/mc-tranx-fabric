@@ -6,7 +6,7 @@
   "mixins": [
   ],
   "client": [
-    "tw.nesquate.TranX.mixin.TranX"
+    "TranX"
   ],
   "injectors": {
     "defaultRequire": 1

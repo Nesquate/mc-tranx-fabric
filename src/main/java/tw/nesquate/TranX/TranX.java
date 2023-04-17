@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tw.nesquate.TranX.command.Commands;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
+import tw.nesquate.TranX.item.Items;
 import tw.nesquate.TranX.money.Money;
 
 import java.util.UUID;
@@ -26,6 +27,8 @@ public class TranX implements ModInitializer {
         Money moneyAdapter = new Money();
         Commands command = new Commands(moneyAdapter);
         command.register();
+        Items items = new Items();
+        items.register();
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             try{
