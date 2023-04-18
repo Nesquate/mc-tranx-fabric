@@ -1,5 +1,5 @@
 package tw.nesquate.TranX.money;
 
 public final class Value {
-    public static int DIAMOND = 5000;
+    public static int COIN = 1;
 }

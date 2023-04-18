@@ -13,6 +13,7 @@ import tw.nesquate.TranX.exception.command.NotEnoughItemException;
 import tw.nesquate.TranX.exception.command.NotRunCommandInGame;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
 import tw.nesquate.TranX.exception.general.ZeroException;
+import tw.nesquate.TranX.exception.money.InsufficientBalance;
 import tw.nesquate.TranX.exception.money.MinusMoneyException;
 import tw.nesquate.TranX.exception.money.NullMoneyException;
 import tw.nesquate.TranX.money.Money;
@@ -77,6 +78,9 @@ public class MoneyCommands {
             return -1;
         } catch (CommandSyntaxException e) {
             return -1;
+        } catch (InsufficientBalance e) {
+            e.sendError(source);
+            return  -1;
         }
     }
 
@@ -85,13 +89,13 @@ public class MoneyCommands {
 
         try{
             PlayerEntity player = Utils.getPlayer(source);
-            Item diamond = Registries.ITEM.get(new Identifier("minecraft", "diamond"));
-            int count = Utils.checkItem(player, diamond);
-            int value = count * Value.DIAMOND;
+            Item coin = Registries.ITEM.get(new Identifier("tranx", "coin"));
+            int count = Utils.checkItem(player, coin);
+            int value = count * Value.COIN;
 
             moneyAdapter.deposit(player, value);
 
-            Utils.decrementItems(player, diamond, count);
+            Utils.decrementItems(player, coin, count);
             source.sendMessage(Text.translatable("Successful to deposit %s", String.valueOf(value)));
 
             return 0;
@@ -116,12 +120,12 @@ public class MoneyCommands {
         try{
             PlayerEntity player = Utils.getPlayer(source);
             Integer argument = context.getArgument("Money", Integer.class);
-            Item diamond = Registries.ITEM.get(new Identifier("minecraft", "diamond"));
+            Item coin = Registries.ITEM.get(new Identifier("tranx", "coin"));
 
-            int amount = Utils.giveItem(player, diamond, Value.DIAMOND, argument);
-            moneyAdapter.withdraw(player, amount * Value.DIAMOND);
+            int amount = Utils.giveItem(player, coin, Value.COIN, argument);
+            moneyAdapter.withdraw(player, amount * Value.COIN);
 
-            source.sendMessage(Text.translatable("Successful to withdraw %s", amount * Value.DIAMOND));
+            source.sendMessage(Text.translatable("Successful to withdraw %s", amount * Value.COIN));
 
             return 0;
         } catch (NullUUIDException e) {
@@ -134,6 +138,9 @@ public class MoneyCommands {
             e.sendError(source);
             return -1;
         } catch (ZeroException e) {
+            e.sendError(source);
+            return -1;
+        } catch (InsufficientBalance e){
             e.sendError(source);
             return -1;
         }

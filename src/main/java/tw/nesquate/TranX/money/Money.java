@@ -2,6 +2,7 @@ package tw.nesquate.TranX.money;
 
 import net.minecraft.entity.player.PlayerEntity;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
+import tw.nesquate.TranX.exception.money.InsufficientBalance;
 import tw.nesquate.TranX.exception.money.MinusMoneyException;
 import tw.nesquate.TranX.exception.money.NullMoneyException;
 
@@ -55,7 +56,7 @@ public class Money {
         }
     }
 
-    public void transfer(PlayerEntity from, PlayerEntity to, BigDecimal money) throws MinusMoneyException {
+    public void transfer(PlayerEntity from, PlayerEntity to, BigDecimal money) throws MinusMoneyException, InsufficientBalance {
         try {
             compareZero(money);
 
@@ -63,6 +64,9 @@ public class Money {
             UUID toUUID = to.getUuid();
 
             BigDecimal fromMoney = this.money.get(fromUUID.toString());
+            if(fromMoney.compareTo(money) < 0){
+                throw new InsufficientBalance();
+            }
             fromMoney = fromMoney.subtract(money);
             this.money.put(fromUUID.toString(), fromMoney);
 
@@ -72,6 +76,8 @@ public class Money {
 
         } catch (MinusMoneyException e) {
             throw new MinusMoneyException();
+        } catch (InsufficientBalance e) {
+            throw new InsufficientBalance();
         }
     }
 
@@ -90,16 +96,21 @@ public class Money {
         }
     }
 
-    public void withdraw(PlayerEntity player, int count) throws NullUUIDException, NullMoneyException {
+    public void withdraw(PlayerEntity player, int count) throws NullUUIDException, NullMoneyException, InsufficientBalance {
         try{
             UUID uuid = player.getUuid();
             BigDecimal money = this.getMoney(uuid);
+            if(money.compareTo(new BigDecimal(count)) < 0){
+                throw new InsufficientBalance();
+            }
             money = money.subtract(new BigDecimal(count));
             this.recordMoney(uuid, money);
         } catch (NullUUIDException e) {
             throw new NullUUIDException();
         } catch (NullMoneyException e) {
             throw new NullMoneyException();
+        } catch (InsufficientBalance e) {
+            throw new InsufficientBalance();
         }
     }
 }
