@@ -5,6 +5,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tw.nesquate.TranX.exception.command.NotEnoughItemException;
 import tw.nesquate.TranX.exception.command.NotRunCommandInGame;
 import tw.nesquate.TranX.exception.general.ZeroException;
@@ -13,6 +15,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class Utils {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("TranX");
     public static PlayerEntity getPlayer(ServerCommandSource source) throws NotRunCommandInGame {
         PlayerEntity player = source.getPlayer();
 

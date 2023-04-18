@@ -12,6 +12,7 @@ import net.minecraft.util.Identifier;
 import tw.nesquate.TranX.exception.command.NotEnoughItemException;
 import tw.nesquate.TranX.exception.command.NotRunCommandInGame;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
+import tw.nesquate.TranX.exception.general.DatabaseErrorException;
 import tw.nesquate.TranX.exception.general.ZeroException;
 import tw.nesquate.TranX.exception.money.InsufficientBalance;
 import tw.nesquate.TranX.exception.money.MinusMoneyException;
@@ -42,9 +43,6 @@ public class MoneyCommands {
             source.sendMessage(Text.translatable("Money: %s", money.toPlainString()));
             return 0;
         } catch (NotRunCommandInGame e) {
-            e.sendError(source);
-            return -1;
-        } catch (NullMoneyException e) {
             e.sendError(source);
             return -1;
         } catch (Exception e){ // Other exception
@@ -81,6 +79,12 @@ public class MoneyCommands {
         } catch (InsufficientBalance e) {
             e.sendError(source);
             return  -1;
+        } catch (NullUUIDException e) {
+            e.sendError(source);
+            return -1;
+        } catch (DatabaseErrorException e) {
+            e.sendError(source);
+            return -1;
         }
     }
 
@@ -109,6 +113,9 @@ public class MoneyCommands {
             e.sendError(source);
             return -1;
         } catch (NullMoneyException e) {
+            e.sendError(source);
+            return -1;
+        } catch (DatabaseErrorException e) {
             e.sendError(source);
             return -1;
         }
@@ -141,6 +148,9 @@ public class MoneyCommands {
             e.sendError(source);
             return -1;
         } catch (InsufficientBalance e){
+            e.sendError(source);
+            return -1;
+        } catch (DatabaseErrorException e) {
             e.sendError(source);
             return -1;
         }

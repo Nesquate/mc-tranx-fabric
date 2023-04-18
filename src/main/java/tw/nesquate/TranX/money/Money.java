@@ -1,7 +1,9 @@
 package tw.nesquate.TranX.money;
 
 import net.minecraft.entity.player.PlayerEntity;
+import tw.nesquate.TranX.database.AbstractDatabase;
 import tw.nesquate.TranX.exception.command.NullUUIDException;
+import tw.nesquate.TranX.exception.general.DatabaseErrorException;
 import tw.nesquate.TranX.exception.money.InsufficientBalance;
 import tw.nesquate.TranX.exception.money.MinusMoneyException;
 import tw.nesquate.TranX.exception.money.NullMoneyException;
@@ -11,30 +13,37 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Money {
-    private final HashMap<String, BigDecimal> money = new HashMap<>();
+    private final AbstractDatabase db;
 
-    public BigDecimal getMoney(UUID uuid) throws NullMoneyException, NullUUIDException {
+    public Money(AbstractDatabase database){
+        db = database;
+    }
+
+    public BigDecimal getMoney(UUID uuid) throws NullUUIDException, DatabaseErrorException {
         if(uuid == null){
             throw new NullUUIDException();
         }
 
-        BigDecimal money = this.money.get(uuid.toString());
+        BigDecimal money = db.read(uuid.toString());
 
         if (money == null) {
-            throw new NullMoneyException();
+            throw new DatabaseErrorException();
         }
 
         return new BigDecimal(money.toPlainString());
     }
 
-    public void newMoneyRecord(UUID uuid) throws NullUUIDException {
+    public void newMoneyRecord(UUID uuid) throws NullUUIDException, DatabaseErrorException {
         if(!isExist(uuid)){
             this.recordMoney(uuid, new BigDecimal(0));
         }
     }
 
     private boolean isExist(UUID uuid){
-        for(String uuidString : this.money.keySet()){
+        HashMap<String, BigDecimal> temp = new HashMap<>();
+        db.readAll(temp);
+
+        for(String uuidString : temp.keySet()){
             if(uuidString.equals(uuid.toString())){
                 return true;
             }
@@ -42,12 +51,16 @@ public class Money {
         return false;
     }
 
-    private void recordMoney(UUID uuid, BigDecimal money) throws NullUUIDException {
+    private void recordMoney(UUID uuid, BigDecimal money) throws NullUUIDException, DatabaseErrorException {
         if(uuid == null){
             throw new NullUUIDException();
         }
+        HashMap<String, BigDecimal> temp = new HashMap<>();
+        temp.put(uuid.toString(), money);
 
-        this.money.put(uuid.toString(), money);
+        if(!db.write(temp)){
+            throw new DatabaseErrorException();
+        }
     }
 
     private void compareZero(BigDecimal a) throws MinusMoneyException {
@@ -56,61 +69,65 @@ public class Money {
         }
     }
 
-    public void transfer(PlayerEntity from, PlayerEntity to, BigDecimal money) throws MinusMoneyException, InsufficientBalance {
+    public void transfer(PlayerEntity from, PlayerEntity to, BigDecimal money) throws MinusMoneyException, InsufficientBalance, NullUUIDException, DatabaseErrorException {
         try {
             compareZero(money);
 
             UUID fromUUID = from.getUuid();
             UUID toUUID = to.getUuid();
 
-            BigDecimal fromMoney = this.money.get(fromUUID.toString());
+            BigDecimal fromMoney = getMoney(fromUUID);
             if(fromMoney.compareTo(money) < 0){
                 throw new InsufficientBalance();
             }
             fromMoney = fromMoney.subtract(money);
-            this.money.put(fromUUID.toString(), fromMoney);
+            recordMoney(fromUUID, fromMoney);
 
-            BigDecimal toMoney = this.money.get(toUUID.toString());
+            BigDecimal toMoney = getMoney(toUUID);
             toMoney = toMoney.add(money);
-            this.money.put(toUUID.toString(), toMoney);
+            recordMoney(toUUID, toMoney);
 
         } catch (MinusMoneyException e) {
             throw new MinusMoneyException();
         } catch (InsufficientBalance e) {
             throw new InsufficientBalance();
+        } catch (NullUUIDException e) {
+            throw new NullUUIDException();
+        } catch (DatabaseErrorException e) {
+            throw new DatabaseErrorException();
         }
     }
 
-    public void deposit(PlayerEntity player, int count) throws NullUUIDException, NullMoneyException {
+    public void deposit(PlayerEntity player, int count) throws NullUUIDException, NullMoneyException, DatabaseErrorException {
         try{
             UUID uuid = player.getUuid();
-            BigDecimal money = this.getMoney(uuid);
+            BigDecimal money = getMoney(uuid);
 
             money = money.add(new BigDecimal(count));
 
             this.recordMoney(uuid, money);
         } catch (NullUUIDException e) {
             throw new NullUUIDException();
-        } catch (NullMoneyException e) {
-            throw new NullMoneyException();
+        } catch (DatabaseErrorException e) {
+            throw new DatabaseErrorException();
         }
     }
 
-    public void withdraw(PlayerEntity player, int count) throws NullUUIDException, NullMoneyException, InsufficientBalance {
+    public void withdraw(PlayerEntity player, int count) throws NullUUIDException, NullMoneyException, InsufficientBalance, DatabaseErrorException {
         try{
             UUID uuid = player.getUuid();
-            BigDecimal money = this.getMoney(uuid);
+            BigDecimal money = getMoney(uuid);
             if(money.compareTo(new BigDecimal(count)) < 0){
                 throw new InsufficientBalance();
             }
             money = money.subtract(new BigDecimal(count));
-            this.recordMoney(uuid, money);
+            recordMoney(uuid, money);
         } catch (NullUUIDException e) {
             throw new NullUUIDException();
-        } catch (NullMoneyException e) {
-            throw new NullMoneyException();
         } catch (InsufficientBalance e) {
             throw new InsufficientBalance();
+        } catch (DatabaseErrorException e) {
+            throw new DatabaseErrorException();
         }
     }
 }
